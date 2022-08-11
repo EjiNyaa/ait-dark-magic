@@ -97,7 +97,7 @@ export function py_class(name, bases_or_object, object = undefined) {
       return instance_super;
     }
 
-    self.__dict__ = () => Object.assign({}, __construct);
+    self.__dict__ = () => Object.assign({}, self);
 
     if (typeof(self.__init__) === "function") {
       self.__init__(...args);
