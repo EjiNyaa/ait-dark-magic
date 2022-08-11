@@ -35,7 +35,7 @@ export function py_class(name, bases_or_object, object = undefined) {
     (() => {throw Error("py_class: Invalid inherited object", bases_or_object);})()
     );
     
-  const base_chain_objects = base_chain.map((py_class_f) => py_class_f.__class__);
+  const base_chain_objects = base_chain.map((py_class_f) => py_class_f.__base__);
   const class_base_object = (object === undefined) ? bases_or_object : object;
   
   const class_ref_object = Object.assign({}, ...base_chain_objects, class_base_object);
