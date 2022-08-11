@@ -39,6 +39,12 @@ export function py_class(name, bases_or_object, object = undefined) {
   const class_base_object = (object === undefined) ? bases_or_object : object;
   
   const class_ref_object = Object.assign({}, ...base_chain_objects, class_base_object);
+  class_ref_object.__name__ = name;
+  class_ref_object.__bases__ = base_chain;
+  class_ref_object.__base__ = class_base_object;
+  class_ref_object.__ref__ = class_ref_object;
+
+  let construct = undefined;
   
   function bind_self_and_return(self, name, method) {
     const name_parts = name.split("$");
@@ -55,7 +61,7 @@ export function py_class(name, bases_or_object, object = undefined) {
     }
     
     function classmethod(method) {
-      return [0.5, method_name, (...args) => method(class_ref_object, ...args)];
+      return [0.5, method_name, (...args) => method(construct, ...args)];
     }
     
     function staticmethod(method) {
@@ -69,13 +75,8 @@ export function py_class(name, bases_or_object, object = undefined) {
     const handlers = {"c": classmethod, "s": staticmethod, undefined: instancemethod};
     return handlers[method_flag](method);
   }
-  
-  class_ref_object.__name__ = name;
-  class_ref_object.__bases__ = base_chain;
-  class_ref_object.__base__ = class_base_object;
-  class_ref_object.__class__ = class_ref_object;
 
-  const construct = function __construct(...args) {
+  construct = function __construct(...args) {
     const self = {};
     
     for (let [ref_name, ref_method] of Object.entries(class_ref_object)) {
@@ -120,7 +121,7 @@ export function py_class(name, bases_or_object, object = undefined) {
     
     return static_super;
   }
-  
+
   for (let [ref_name, ref_method] of Object.entries(class_ref_object)) {
     const [is_static, static_name, static_method] = bind_self_and_return(undefined, ref_name, ref_method);
     if (is_static) {
@@ -128,6 +129,8 @@ export function py_class(name, bases_or_object, object = undefined) {
       delete class_ref_object[ref_name];
     }
   }
+
+  construct.__class__ = construct;
 
   return construct;
 }
