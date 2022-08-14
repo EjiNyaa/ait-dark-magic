@@ -48,12 +48,12 @@ export function py_class(name, bases_or_object, object = undefined) {
   
   function bind_self_and_return(self, name, method) {
     const name_parts = name.split("$");
-    let [method_flag, method_name] = [undefined, name];
+    let [method_flag, method_name] = [null, name];
     if (name_parts.length > 1) {[method_flag, method_name] = [name_parts[0], name_parts.slice(1).join("$")]};
     
-    const available_flags = ["c", "s"];
+    const available_flags = ["c", "s", "prop", "set"];
     if (!!method_flag && !available_flags.includes(method_flag)) {
-      [method_flag, method_name] = [undefined, `${method_flag}$${method_name}`];
+      [method_flag, method_name] = [null, `${method_flag}$${method_name}`];
     }
     
     if (typeof(method) !== "function") { // Static values
@@ -71,8 +71,26 @@ export function py_class(name, bases_or_object, object = undefined) {
     function instancemethod(method) {
       return [false, method_name, (...args) => method(self, ...args)];
     }
+
+    function instanceproperty(method) {
+      if (typeof(self) === "object" && self !== null) {
+        Object.defineProperty(self, method_name, {get: () => method(self)});
+      }
+      return [false, `__get_${method_name}`, method];
+    }
+
+    function instancesetter(method) {
+      if (typeof(self) === "object" && self !== null) {
+        Object.defineProperty(self, method_name, {get: (value) =>method(self, value)});
+      }
+      return [false, `__set_${method_name}, method`];
+    }
+
+    const handlers = {
+      "c": classmethod, "s": staticmethod, 
+      "prop": instanceproperty, "set": instancesetter,
+      null: instancemethod};
     
-    const handlers = {"c": classmethod, "s": staticmethod, undefined: instancemethod};
     return handlers[method_flag](method);
   }
 
@@ -97,7 +115,7 @@ export function py_class(name, bases_or_object, object = undefined) {
       return instance_super;
     }
 
-    self.__dict__ = () => Object.assign({}, self);
+    self.__dict__ = () => self;
 
     if (typeof(self.__init__) === "function") {
       self.__init__(...args);
