@@ -118,7 +118,8 @@ export function py_class(name, bases_or_object, object = undefined) {
     self.__dict__ = () => self;
 
     if (typeof(self.__init__) === "function") {
-      self.__init__(...args);
+      const override_self = self.__init__(...args);
+      if (override_self !== undefined) return override_self;
     }
 
     return self;
