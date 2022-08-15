@@ -61,7 +61,7 @@ export function py_class(name, bases_or_object, object = undefined) {
     }
     
     function classmethod(method) {
-      return [0.5, method_name, (...args) => method(construct, ...args)];
+      return [true, method_name, (...args) => method(construct, ...args)];
     }
     
     function staticmethod(method) {
@@ -124,35 +124,3 @@ export function py_class(name, bases_or_object, object = undefined) {
 
     return self;
   }
-  
-  for (let [ref_name, ref_method] of Object.entries(class_ref_object)) {
-    const [is_static, static_name, static_method] = bind_self_and_return(undefined, ref_name, ref_method);
-    if (is_static) {construct[static_name] = static_method;}
-  }
-
-  construct.$super = function() {
-    let static_super = {};
-    
-    for (let base_chain_object of base_chain_objects) {
-      for (let [ref_name, ref_method] of Object.entries(base_chain_object)) {
-        const [is_static, static_name, static_method] = bind_self_and_return(undefined, ref_name, ref_method);
-        if (is_static) {static_super[static_name] = static_method;}
-      }
-    }
-    
-    return static_super;
-  }
-
-  for (let [ref_name, ref_method] of Object.entries(class_ref_object)) {
-    const [is_static, static_name, static_method] = bind_self_and_return(undefined, ref_name, ref_method);
-    if (is_static) {
-      class_ref_object[static_name] = static_method;
-      delete class_ref_object[ref_name];
-    }
-  }
-
-  construct.__class__ = construct;
-  construct.__dict__ = () => Object.assign({}, construct);
-
-  return construct;
-}
