@@ -13,7 +13,7 @@ const Human = py_class("Human", {
     console.log(`Hi, I'm ${self.initials[self.gender]} ${self.name}`); // Binds self
   },
   
-  s$greet() { // s$: @staticmethod, c$: @classmethod
+  s$greet() {
     console.log("Greetings!");
   }
 });
@@ -25,6 +25,14 @@ const Angel = py_class("Angel", Human, {
 });
 
 Angel.$super(); // returns contents of merged parent classes.
+
+// These following decorators and defined:
+s$: @staticmethod, c$: @classmethod, prop$: @property, set$: @property.setter
+
+// These following dunders are defined:
+__name__, __dict__,
+__base__ (Original prototype), __bases__, 
+__ref__ (Actual prototype), __class__ (Created constructor)
 */
 
 export function py_class(name, bases_or_object, object = undefined) {
