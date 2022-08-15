@@ -84,14 +84,14 @@ export function py_class(name, bases_or_object, object = undefined) {
       if (typeof(self) === "object" && self !== null) {
         Object.defineProperty(self, method_name, {get: () => method(self), configurable: true});
       }
-      return [false, `__get_${method_name}`, method];
+      return [false, `_get_${method_name}`, method];
     }
 
     function instancesetter(method) {
       if (typeof(self) === "object" && self !== null) {
         Object.defineProperty(self, method_name, {set: (value) => method(self, value), configurable: true});
       }
-      return [false, `__set_${method_name}`, method];
+      return [false, `_set_${method_name}`, method];
     }
 
     const handlers = {
